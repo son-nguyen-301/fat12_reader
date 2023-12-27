@@ -3,7 +3,7 @@
 #include "fat_struct.h"
 #include "fat_rd.h"
 
-static RootDirectoryEntry rootDirectoryEntry;
+static FileEntryStruct rootDirectoryEntry;
 
 static uint8_t getFileCreationHour(uint16_t time)
 {
@@ -40,17 +40,41 @@ static uint8_t getFileStatus(uint64_t fileName)
   return (fileName & FILE_STATUS_MASK) >> 56;
 }
 
-static void validateFileName(uint64_t fileName)
+uint64_t getFileName()
 {
+
+  if (rootDirectoryEntry.filename[LONG_FILE_NAME_ATTRS_POSITION] == IS_LONG_FILE_NAME_MASK)
+  {
+    printf("1st: %x\n", rootDirectoryEntry.filename[LFN_2ND_SEQUENCE_POSITION]);
+  }
 }
 
-void getRootDirectory(FILE *fp, uint16_t rootDirectoryBlock)
+static uint16_t getFATSize(FILE *fp)
 {
-  fseek(fp, rootDirectoryBlock * 512, SEEK_SET);
-  fread(&rootDirectoryEntry, sizeof(rootDirectoryEntry), 1, fp);
+  uint16_t FATSize;
 
-  uint64_t *fileName = (uint64_t *)rootDirectoryEntry.filename;
+  fseek(fp, 0x16, SEEK_SET);
+  fread(&FATSize, sizeof(FATSize), 1, fp);
 
-  printf("File status: %x\n", getFileStatus(*fileName));
-  printf("File name: %s\n", rootDirectoryEntry.filename);
+  return FATSize;
+}
+
+static uint8_t getNumberOfFAT(FILE *fp)
+{
+  uint16_t numberOfFAT;
+
+  fseek(fp, 0x10, SEEK_SET);
+  fread(&numberOfFAT, sizeof(numberOfFAT), 1, fp);
+
+  return numberOfFAT;
+}
+
+uint16_t getRootDirectoryBlock(FILE *fp)
+{
+  return getNumberOfFAT(fp) * getFATSize(fp) + 1;
+}
+
+void getAllFolderEntries(FileEntryStruct *entries, FILE *fp, uint16_t folderBlock)
+{
+  FileEntryStruct *entry = malloc(sizeof(FileEntryStruct));
 }

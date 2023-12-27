@@ -10,4 +10,4 @@ typedef struct
   uint16_t modify_date;
   uint16_t starting_cluster;
   uint32_t file_size;
-} RootDirectoryEntry;
+} FileEntryStruct;
