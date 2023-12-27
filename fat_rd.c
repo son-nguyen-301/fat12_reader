@@ -1,25 +1,56 @@
 #include <stdio.h>
+#include <stdint.h>
 #include "fat_struct.h"
+#include "fat_rd.h"
 
 static RootDirectoryEntry rootDirectoryEntry;
 
-// FAT12 find root directory entry
-void findRootDirectoryEntry(FILE *fp)
+static uint8_t getFileCreationHour(uint16_t time)
 {
-  // Read the first root directory entry
-  fseek(fp, 0x2600, SEEK_SET);
+  return (time & HOUR_MASK) >> 11;
+}
+
+static uint8_t getFileCreationMinute(uint16_t time)
+{
+  return (time & MINUTE_MASK) >> 5;
+}
+
+static uint8_t getFileCreationSecond(uint16_t time)
+{
+  return (time & SECOND_MASK) * 2;
+}
+
+static uint16_t getFileCreationYear(uint16_t date)
+{
+  return ((date & YEAR_MASK) >> 9) + 1980;
+}
+
+static uint8_t getFileCreationMonth(uint16_t date)
+{
+  return (date & MONTH_MASK) >> 5;
+}
+
+static uint8_t getFileCreationDay(uint16_t date)
+{
+  return date & DAY_MASK;
+}
+
+static uint8_t getFileStatus(uint64_t fileName)
+{
+  return (fileName & FILE_STATUS_MASK) >> 56;
+}
+
+static void validateFileName(uint64_t fileName)
+{
+}
+
+void getRootDirectory(FILE *fp, uint16_t rootDirectoryBlock)
+{
+  fseek(fp, rootDirectoryBlock * 512, SEEK_SET);
   fread(&rootDirectoryEntry, sizeof(rootDirectoryEntry), 1, fp);
 
-  // Print the first root directory entry
-  printf("Root directory entry:\n");
-  printf("    Filename: %s\n", rootDirectoryEntry.filename);
-  printf("    Extension: %s\n", rootDirectoryEntry.ext);
-  printf("    Attributes: %d\n", rootDirectoryEntry.attributes);
-  printf("    Reserved: %d\n", rootDirectoryEntry.reserved);
-  printf("    Creation time: %d\n", rootDirectoryEntry.modify_time);
-  printf("    Creation date: %d\n", rootDirectoryEntry.modify_date);
-  printf("    Starting cluster: %d\n", rootDirectoryEntry.starting_cluster);
-  printf("    File size: %d\n", rootDirectoryEntry.file_size);
+  uint64_t *fileName = (uint64_t *)rootDirectoryEntry.filename;
 
-  fclose(fp);
+  printf("File status: %x\n", getFileStatus(*fileName));
+  printf("File name: %s\n", rootDirectoryEntry.filename);
 }
