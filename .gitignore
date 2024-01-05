@@ -1,4 +1,4 @@
 *.exe
 main
-main.dSYM
-.vs_code
+*.dSYM
+.vscode

@@ -3,7 +3,8 @@
 #include "fat_struct.h"
 #include "fat_rd.h"
 
-static FileEntryStruct rootDirectoryEntry;
+static FileEntryStruct rootDirectoryEntries[];
+static uint8_t directoriesCount = 0;
 
 static uint8_t getFileCreationHour(uint16_t time)
 {
@@ -35,20 +36,6 @@ static uint8_t getFileCreationDay(uint16_t date)
   return date & DAY_MASK;
 }
 
-static uint8_t getFileStatus(uint64_t fileName)
-{
-  return (fileName & FILE_STATUS_MASK) >> 56;
-}
-
-uint64_t getFileName()
-{
-
-  if (rootDirectoryEntry.filename[LONG_FILE_NAME_ATTRS_POSITION] == IS_LONG_FILE_NAME_MASK)
-  {
-    printf("1st: %x\n", rootDirectoryEntry.filename[LFN_2ND_SEQUENCE_POSITION]);
-  }
-}
-
 static uint16_t getFATSize(FILE *fp)
 {
   uint16_t FATSize;
@@ -74,7 +61,6 @@ uint16_t getRootDirectoryBlock(FILE *fp)
   return getNumberOfFAT(fp) * getFATSize(fp) + 1;
 }
 
-void getAllFolderEntries(FileEntryStruct *entries, FILE *fp, uint16_t folderBlock)
+void getAllFolderEntries(FILE *fp, uint16_t folderBlock)
 {
-  FileEntryStruct *entry = malloc(sizeof(FileEntryStruct));
 }

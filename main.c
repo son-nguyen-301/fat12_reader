@@ -8,8 +8,6 @@ void main()
 
   uint16_t rootDirectoryBlock = getRootDirectoryBlock(fp);
 
-  FileEntryStruct rootDirectoryEntries[];
-
   getAllFolderEntries(fp, rootDirectoryBlock);
 
   fclose(fp);
